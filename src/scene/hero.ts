@@ -19,10 +19,10 @@ export interface HeroBrand {
 /* ------------------------------------------------------------------------ */
 
 const TILE_COUNT = 10;
-const TILE_WIDTH = 28;
-const TILE_HEIGHT = 23;
+const TILE_WIDTH = 26;
+const TILE_HEIGHT = 21;
 const TILE_DEPTH = 3.5;
-const TILE_RADIUS = 4.5;
+const TILE_RADIUS = 4.2;
 const TILE_SEGMENTS = 4;
 const FLOAT_AMPLITUDE = 1.5;
 const HOVER_LIFT = 6;
@@ -32,7 +32,11 @@ const HOVER_SCALE = 0.1;
 // than square) so a landscape tile face never stretches the logo.
 const CANVAS_W = 1024;
 const CANVAS_H = Math.round((CANVAS_W * TILE_HEIGHT) / TILE_WIDTH);
-const CANVAS_PADDING_RATIO = 0.11; // logo fills ~78% of the tile width
+// The cropped logo content fills whichever of these binds first.
+const LOGO_MAX_WIDTH_RATIO = 0.84;
+const LOGO_MAX_HEIGHT_RATIO = 0.7;
+const LOGO_RASTER_WIDTH = 1600;
+const LOGO_ALPHA_THRESHOLD = 10;
 
 const MAIN_FOV = 30;
 const MAIN_POLAR = 1.3;
@@ -42,10 +46,15 @@ const STAGE_AZIMUTH = 0.55;
 
 // Camera fit: how much of the container's NDC half-extent the composition's
 // projected bounding box is allowed to reach (1.0 = touching the edge).
-const FILL_FRACTION_DESKTOP = 0.85;
-const FILL_FRACTION_MOBILE = 0.9;
+const FILL_FRACTION_DESKTOP = 0.92;
+const FILL_FRACTION_MOBILE = 0.94;
 const MOBILE_BREAKPOINT = 860;
 const STAGE_FILL_FRACTION = 0.8;
+
+// Aims the main camera slightly above the composition's true centre, so the
+// composition itself renders a bit lower in the card — clearing room at the
+// top edge for the "Your brand here?" annotation without shrinking anything.
+const MAIN_VERTICAL_BIAS = 0.04;
 
 /* ------------------------------------------------------------------------ */
 /* Small utilities                                                          */
@@ -154,6 +163,69 @@ function createPlaceholderCanvas(): HTMLCanvasElement {
   return canvas;
 }
 
+interface LogoContent {
+  /** Large offscreen raster of the source logo, used as the drawImage source. */
+  raster: HTMLCanvasElement;
+  /** Tight pixel bounding box (in raster space) of the logo's non-transparent content. */
+  bbox: { x: number; y: number; w: number; h: number };
+}
+
+// Most brand SVGs carry a lot of empty canvas around their actual mark (a
+// 200x80 viewBox with a small icon + short text, say). Rasterising at a large
+// size and scanning the alpha channel finds the real content box generically
+// — no per-brand tuning, and it keeps working for real logos later.
+const logoContentCache = new Map<string, Promise<LogoContent | null>>();
+
+function computeLogoContent(logoUrl: string): Promise<LogoContent | null> {
+  const cached = logoContentCache.get(logoUrl);
+  if (cached) return cached;
+
+  const promise = (async (): Promise<LogoContent | null> => {
+    try {
+      const img = await loadImage(logoUrl);
+      const rasterW = LOGO_RASTER_WIDTH;
+      const rasterH = Math.max(1, Math.round((LOGO_RASTER_WIDTH * img.height) / img.width));
+      const raster = document.createElement("canvas");
+      raster.width = rasterW;
+      raster.height = rasterH;
+      const rctx = raster.getContext("2d", { willReadFrequently: true });
+      if (!rctx) return null;
+      rctx.clearRect(0, 0, rasterW, rasterH);
+      rctx.drawImage(img, 0, 0, rasterW, rasterH);
+
+      const { data } = rctx.getImageData(0, 0, rasterW, rasterH);
+      let minX = rasterW;
+      let minY = rasterH;
+      let maxX = -1;
+      let maxY = -1;
+      for (let y = 0; y < rasterH; y++) {
+        const rowOffset = y * rasterW;
+        for (let x = 0; x < rasterW; x++) {
+          const alpha = data[(rowOffset + x) * 4 + 3];
+          if (alpha > LOGO_ALPHA_THRESHOLD) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      const bbox =
+        maxX >= minX && maxY >= minY
+          ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }
+          : { x: 0, y: 0, w: rasterW, h: rasterH }; // fully transparent source: fall back to the whole image
+
+      return { raster, bbox };
+    } catch {
+      return null;
+    }
+  })();
+
+  logoContentCache.set(logoUrl, promise);
+  return promise;
+}
+
 async function createLogoCanvas(logoUrl: string): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = CANVAS_W;
@@ -164,16 +236,18 @@ async function createLogoCanvas(logoUrl: string): Promise<HTMLCanvasElement> {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-  try {
-    const img = await loadImage(logoUrl);
-    // Fill ~78% of the tile's width, height following the logo's own aspect
-    // ratio — a printed-sticker fill rather than a padded, shrunk-down icon.
-    const targetW = CANVAS_W * (1 - CANVAS_PADDING_RATIO * 2);
-    const scale = targetW / img.width;
-    const w = img.width * scale;
-    const h = img.height * scale;
-    ctx.drawImage(img, (CANVAS_W - w) / 2, (CANVAS_H - h) / 2, w, h);
-  } catch {
+  const content = await computeLogoContent(logoUrl);
+  if (content) {
+    const { raster, bbox } = content;
+    // Fit the cropped content into whichever of the two caps binds first,
+    // so every logo reads as large as the tile can hold.
+    const maxW = CANVAS_W * LOGO_MAX_WIDTH_RATIO;
+    const maxH = CANVAS_H * LOGO_MAX_HEIGHT_RATIO;
+    const scale = Math.min(maxW / bbox.w, maxH / bbox.h);
+    const w = bbox.w * scale;
+    const h = bbox.h * scale;
+    ctx.drawImage(raster, bbox.x, bbox.y, bbox.w, bbox.h, (CANVAS_W - w) / 2, (CANVAS_H - h) / 2, w, h);
+  } else {
     const s = CANVAS_H / 410;
     ctx.fillStyle = "#c9d9dd";
     ctx.textAlign = "center";
@@ -216,14 +290,22 @@ function projectedHalfExtent(camera: THREE.PerspectiveCamera, corners: THREE.Vec
  * sphere. Uses a short bracket-then-bisect search since perspective size
  * isn't invertible in closed form once the box's own depth extent matters.
  */
+/**
+ * @param verticalBias Fraction of the vertical FOV to re-aim upward after
+ * fitting, so the composition sits slightly lower in frame (leaves clear
+ * space at the top edge, e.g. for the annotation callout) without changing
+ * its size. Returns the point the camera actually ends up looking at, so
+ * callers can keep OrbitControls' target in sync.
+ */
 function fitCameraToBox(
   camera: THREE.PerspectiveCamera,
   corners: THREE.Vector3[],
   center: THREE.Vector3,
   direction: THREE.Vector3,
   aspect: number,
-  fillFraction: number
-): void {
+  fillFraction: number,
+  verticalBias = 0
+): THREE.Vector3 {
   camera.aspect = aspect;
   const dir = direction.clone().normalize();
 
@@ -255,6 +337,16 @@ function fitCameraToBox(
     }
   }
   apply(hi); // leave the camera at the converged (slightly conservative) distance
+
+  if (verticalBias === 0) return center;
+
+  const vFov = THREE.MathUtils.degToRad(camera.fov);
+  const distance = camera.position.distanceTo(center);
+  const worldShift = distance * Math.tan(verticalBias * vFov);
+  const aimPoint = center.clone().add(new THREE.Vector3(0, worldShift, 0));
+  camera.lookAt(aimPoint);
+  camera.updateMatrixWorld(true);
+  return aimPoint;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -339,11 +431,14 @@ function setup(container: HTMLElement, brands: HeroBrand[]): void {
   scene.add(wordmarkGroup);
 
   /* ---- sticker tiles ---- */
-  const frostMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0 });
+  // A slightly cool grey on the sides/back (vs. pure white on the front and
+  // on the letters) reads as a distinct, physical sticker edge rather than
+  // blending into the card background.
+  const frostMaterial = new THREE.MeshStandardMaterial({ color: 0xe2eaed, roughness: 0.5, metalness: 0 });
   const tileGeometry = new RoundedBoxGeometry(TILE_WIDTH, TILE_HEIGHT, TILE_DEPTH, TILE_SEGMENTS, TILE_RADIUS);
 
-  const rx = 0.64 * wordmarkSize.x;
-  const ry = 1.45 * wordmarkSize.y;
+  const rx = 0.57 * wordmarkSize.x;
+  const ry = 1.3 * wordmarkSize.y;
   const depthRange = wordmarkSize.z * 1.1 + 4;
 
   const byRank = new Map(brands.map((b) => [b.rank, b] as const));
@@ -384,7 +479,7 @@ function setup(container: HTMLElement, brands: HeroBrand[]): void {
 
     const materials = [frostMaterial, frostMaterial, frostMaterial, frostMaterial, frontMaterial, frostMaterial];
     const mesh = new THREE.Mesh(tileGeometry, materials);
-    mesh.castShadow = false;
+    mesh.castShadow = true;
     mesh.receiveShadow = true;
 
     const rotX = -0.18 - Math.cos(angle) * 0.04;
@@ -502,10 +597,18 @@ function setup(container: HTMLElement, brands: HeroBrand[]): void {
 
   const camera = new THREE.PerspectiveCamera(MAIN_FOV, 4 / 3, 1, 2000);
   const mainDirection = new THREE.Vector3().setFromSphericalCoords(1, MAIN_POLAR, MAIN_AZIMUTH);
-  fitCameraToBox(camera, compositionCorners, fitCenter, mainDirection, 4 / 3, FILL_FRACTION_DESKTOP);
+  const initialAim = fitCameraToBox(
+    camera,
+    compositionCorners,
+    fitCenter,
+    mainDirection,
+    4 / 3,
+    FILL_FRACTION_DESKTOP,
+    MAIN_VERTICAL_BIAS
+  );
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.copy(fitCenter);
+  controls.target.copy(initialAim);
   controls.enableZoom = false;
   controls.enablePan = false;
   controls.enableDamping = true;
@@ -533,10 +636,13 @@ function setup(container: HTMLElement, brands: HeroBrand[]): void {
 
   /* ---- resize / fit ---- */
   function applyFit(width: number, aspect: number): void {
-    const dir = camera.position.clone().sub(controls.target);
+    // Measured from the true composition centre (not controls.target, which
+    // carries the vertical-bias offset) so repeated resizes can't drift.
+    const dir = camera.position.clone().sub(fitCenter);
     const normalized = dir.lengthSq() > 0 ? dir : mainDirection.clone();
     const fillFraction = width <= MOBILE_BREAKPOINT ? FILL_FRACTION_MOBILE : FILL_FRACTION_DESKTOP;
-    fitCameraToBox(camera, compositionCorners, fitCenter, normalized, aspect, fillFraction);
+    const aim = fitCameraToBox(camera, compositionCorners, fitCenter, normalized, aspect, fillFraction, MAIN_VERTICAL_BIAS);
+    controls.target.copy(aim);
     controls.update();
   }
 

@@ -179,7 +179,7 @@
   max-width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-lg);
-  background: radial-gradient(120% 120% at 30% 20%, #ffffff 0%, var(--color-mist) 60%, #dcebee 100%);
+  background: linear-gradient(135deg, #eef6f7 0%, #d7e8ec 100%);
   border: 1px solid var(--color-border);
   overflow: hidden;
   display: flex;
@@ -235,7 +235,7 @@
 
 .hero-scene__caption {
   position: absolute;
-  bottom: 22px;
+  bottom: 10px;
   left: 0;
   right: 0;
   text-align: center;
@@ -245,15 +245,41 @@
   color: var(--color-teal);
   opacity: 0.75;
   pointer-events: none;
+  padding: 4px 12px;
+  width: max-content;
+  margin-inline: auto;
+  border-radius: 999px;
+  background: rgba(238, 246, 247, 0.85);
+  backdrop-filter: blur(4px);
 }
 
 .annotation {
   position: absolute;
   top: 6%;
-  right: 4%;
+  right: 8%;
   width: 130px;
   color: var(--color-coral-dark);
   pointer-events: none;
+}
+
+/* Wide viewBox so the arrow can reach from the top-right corner all the way
+   to the #1 (top-centre) tile without the text itself moving off-corner. */
+.annotation--wide {
+  top: 5%;
+  right: 8%;
+  width: 230px;
+}
+
+.annotation--wide text,
+.annotation--compact text {
+  text-anchor: end;
+}
+
+.annotation--compact {
+  display: none;
+  top: 4%;
+  right: 6%;
+  width: 150px;
 }
 
 .annotation text {
@@ -271,14 +297,16 @@
 }
 
 @media (max-width: 600px) {
-  .annotation {
-    top: 2%;
-    right: 2%;
-    width: 96px;
+  .annotation--wide {
+    display: none;
   }
 
-  .annotation text {
-    font-size: 17px;
+  .annotation--compact {
+    display: block;
+  }
+
+  .annotation--compact text {
+    font-size: 15px;
   }
 }
 
@@ -682,7 +710,7 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-lg);
-  background: radial-gradient(120% 120% at 70% 30%, #ffffff 0%, var(--color-mist) 60%, #dcebee 100%);
+  background: linear-gradient(135deg, #eef6f7 0%, #d7e8ec 100%);
   border: 1px solid var(--color-border);
   overflow: hidden;
   display: flex;
