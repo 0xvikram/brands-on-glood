@@ -1,0 +1,192 @@
+[
+  {
+    "rank": 1,
+    "name": "Marigold Tea Co.",
+    "slug": "marigold-tea",
+    "storeUrl": "https://marigold-tea.example",
+    "logo": "/brands/marigold-tea.svg",
+    "color": "#C97B2E",
+    "verified": {
+      "join": 1,
+      "install": 1,
+      "share": 3,
+      "logo_mock": 1,
+      "referral": 5,
+      "roast": 0,
+      "demo": 1,
+      "growth_story": 1,
+      "creative_bonus": 1
+    }
+  },
+  {
+    "rank": 2,
+    "name": "Northline Outdoor",
+    "slug": "northline-outdoor",
+    "storeUrl": "https://northline-outdoor.example",
+    "logo": "/brands/northline-outdoor.svg",
+    "color": "#2F5233",
+    "verified": {
+      "join": 1,
+      "install": 0,
+      "share": 3,
+      "logo_mock": 0,
+      "referral": 5,
+      "roast": 1,
+      "demo": 1,
+      "growth_story": 1,
+      "creative_bonus": 1
+    }
+  },
+  {
+    "rank": 3,
+    "name": "Keo Skincare",
+    "slug": "keo-skincare",
+    "storeUrl": "https://keo-skincare.example",
+    "logo": "/brands/keo-skincare.svg",
+    "color": "#D98E97",
+    "verified": {
+      "join": 1,
+      "install": 1,
+      "share": 2,
+      "logo_mock": 0,
+      "referral": 4,
+      "roast": 0,
+      "demo": 1,
+      "growth_story": 1,
+      "creative_bonus": 1
+    }
+  },
+  {
+    "rank": 4,
+    "name": "Velora & Co.",
+    "slug": "velora",
+    "storeUrl": "https://velora.example",
+    "logo": "/brands/velora.svg",
+    "color": "#A67C27",
+    "verified": {
+      "join": 1,
+      "install": 1,
+      "share": 3,
+      "logo_mock": 1,
+      "referral": 3,
+      "roast": 0,
+      "demo": 0,
+      "growth_story": 1,
+      "creative_bonus": 1
+    }
+  },
+  {
+    "rank": 5,
+    "name": "Amara Studio",
+    "slug": "amara-studio",
+    "storeUrl": "https://amara-studio.example",
+    "logo": "/brands/amara-studio.svg",
+    "color": "#8E3B46",
+    "verified": {
+      "join": 1,
+      "install": 0,
+      "share": 3,
+      "logo_mock": 0,
+      "referral": 4,
+      "roast": 0,
+      "demo": 1,
+      "growth_story": 1,
+      "creative_bonus": 0
+    }
+  },
+  {
+    "rank": 6,
+    "name": "Fernwood Home",
+    "slug": "fernwood-home",
+    "storeUrl": "https://fernwood-home.example",
+    "logo": "/brands/fernwood-home.svg",
+    "color": "#7A5C3E",
+    "verified": {
+      "join": 1,
+      "install": 0,
+      "share": 3,
+      "logo_mock": 0,
+      "referral": 5,
+      "roast": 0,
+      "demo": 0,
+      "growth_story": 0,
+      "creative_bonus": 0
+    }
+  },
+  {
+    "rank": 7,
+    "name": "Pawmingo",
+    "slug": "pawmingo",
+    "storeUrl": "https://pawmingo.example",
+    "logo": "/brands/pawmingo.svg",
+    "color": "#3E8E7E",
+    "verified": {
+      "join": 1,
+      "install": 1,
+      "share": 2,
+      "logo_mock": 1,
+      "referral": 3,
+      "roast": 0,
+      "demo": 0,
+      "growth_story": 0,
+      "creative_bonus": 0
+    }
+  },
+  {
+    "rank": 8,
+    "name": "Bramblecup Coffee",
+    "slug": "bramblecup-coffee",
+    "storeUrl": "https://bramblecup-coffee.example",
+    "logo": "/brands/bramblecup-coffee.svg",
+    "color": "#4A3226",
+    "verified": {
+      "join": 1,
+      "install": 0,
+      "share": 1,
+      "logo_mock": 0,
+      "referral": 2,
+      "roast": 1,
+      "demo": 1,
+      "growth_story": 1,
+      "creative_bonus": 0
+    }
+  },
+  {
+    "rank": 9,
+    "name": "Ridgeback Fitness",
+    "slug": "ridgeback-fitness",
+    "storeUrl": "https://ridgeback-fitness.example",
+    "logo": "/brands/ridgeback-fitness.svg",
+    "color": "#C1272D",
+    "verified": {
+      "join": 1,
+      "install": 1,
+      "share": 2,
+      "logo_mock": 1,
+      "referral": 0,
+      "roast": 0,
+      "demo": 1,
+      "growth_story": 0,
+      "creative_bonus": 0
+    }
+  },
+  {
+    "rank": 10,
+    "name": "Little Sprout Kids",
+    "slug": "little-sprout-kids",
+    "storeUrl": "https://little-sprout-kids.example",
+    "logo": "/brands/little-sprout-kids.svg",
+    "color": "#5FA8D3",
+    "verified": {
+      "join": 1,
+      "install": 0,
+      "share": 1,
+      "logo_mock": 1,
+      "referral": 0,
+      "roast": 0,
+      "demo": 0,
+      "growth_story": 1,
+      "creative_bonus": 1
+    }
+  }
+]

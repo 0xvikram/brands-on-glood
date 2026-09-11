@@ -1,0 +1,6 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 40L26 26L42 40" stroke="#7A5C3E" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="18" y="40" width="16" height="12" fill="#7A5C3E"/>
+  <text x="50" y="38" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#7A5C3E">Fernwood</text>
+  <text x="50" y="57" font-family="Georgia, 'Times New Roman', serif" font-size="14" font-weight="500" fill="#7A5C3E" letter-spacing="4">HOME</text>
+</svg>

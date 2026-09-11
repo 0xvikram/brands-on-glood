@@ -1,0 +1,5 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 46L20 26L30 40L38 30L52 46Z" fill="#2F5233"/>
+  <text x="58" y="38" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#2F5233">NORTHLINE</text>
+  <text x="58" y="58" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#2F5233" letter-spacing="4">OUTDOOR</text>
+</svg>

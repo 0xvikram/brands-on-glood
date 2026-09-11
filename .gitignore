@@ -1,0 +1,12 @@
+node_modules
+dist
+*.tsbuildinfo
+.vercel
+.env
+.env.*
+*.local
+.DS_Store
+.env*
+
+!.env.example
+_ref/mock.png

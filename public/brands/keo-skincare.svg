@@ -1,0 +1,5 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 22c8 10 12 17 12 24a12 12 0 1 1-24 0c0-7 4-14 12-24z" fill="#D98E97"/>
+  <text x="48" y="38" font-family="'Trebuchet MS', Helvetica, sans-serif" font-size="24" font-weight="700" fill="#D98E97">Keo</text>
+  <text x="48" y="58" font-family="'Trebuchet MS', Helvetica, sans-serif" font-size="15" font-weight="500" fill="#D98E97" letter-spacing="3">SKINCARE</text>
+</svg>
